@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   AppBar,
   Toolbar,
@@ -17,82 +17,60 @@ import {
   ListItemButton,
   ListItemText,
   Chip,
-  Select,
+  InputBase,
+  Menu,
   MenuItem,
-  FormControl,
+  Avatar,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   X as CloseIcon,
   HardHat,
-  Calculator,
-  Building2,
-  Scale,
-  ShieldCheck,
-  UserCheck,
-  MapPin,
+  Search,
   Sparkles,
+  ChevronDown,
+  User,
+  LogOut,
+  FileText,
+  ShieldCheck,
 } from 'lucide-react';
-import { POPULAR_CITIES } from '@/lib/currency';
+import { useAuth } from '@/context/AuthContext';
+import AuthModal from '@/components/common/AuthModal';
+import NirmanAIModal from '@/components/common/NirmanAIModal';
 
 export default function Navbar() {
+  const router = useRouter();
   const pathname = usePathname();
+  const { user, logout, setOpenLoginModal, setOpenSignupModal } = useAuth();
+
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [selectedCity, setSelectedCity] = React.useState(POPULAR_CITIES[0]);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [aiModalOpen, setAiModalOpen] = React.useState(false);
+
+  // Sign up dropdown anchor
+  const [signupAnchor, setSignupAnchor] = React.useState<null | HTMLElement>(null);
+
+  // User menu anchor
+  const [userAnchor, setUserAnchor] = React.useState<null | HTMLElement>(null);
 
   const navLinks = [
-    { label: 'Find Contractors', href: '/contractors', icon: HardHat },
-    { label: 'Cost Estimator', href: '/cost-estimator', icon: Calculator, badge: 'Instant' },
-    { label: 'Completed Projects', href: '/projects', icon: Building2 },
-    { label: 'Compare', href: '/compare', icon: Scale },
+    { label: 'Find Contractors', href: '/contractors' },
+    { label: 'Cost Estimator', href: '/cost-estimator' },
+    { label: 'Completed Projects', href: '/projects' },
+    { label: 'Compare', href: '/compare' },
   ];
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/contractors?city=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      router.push('/contractors');
+    }
+  };
 
   return (
     <>
-      {/* Top Trust & Announcement Bar */}
-      <Box
-        sx={{
-          bgcolor: '#0F172A',
-          color: '#94A3B8',
-          py: 0.75,
-          fontSize: '0.8rem',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <ShieldCheck size={14} color="#10B981" />
-              <Typography variant="caption" sx={{ color: '#E2E8F0', fontWeight: 500 }}>
-                100% Verified Civil Thekedars & Turnkey Contractors • Zero Brokerage
-              </Typography>
-            </Box>
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2 }}>
-              <Link href="/admin/dashboard" style={{ textDecoration: 'none' }}>
-                <Chip
-                  icon={<UserCheck size={13} color="#F59E0B" />}
-                  label="Admin Demo Panel"
-                  size="small"
-                  clickable
-                  sx={{
-                    bgcolor: 'rgba(245, 158, 11, 0.15)',
-                    color: '#FCD34D',
-                    border: '1px solid rgba(245, 158, 11, 0.3)',
-                    height: 22,
-                    fontSize: '0.72rem',
-                    fontWeight: 600,
-                  }}
-                />
-              </Link>
-              <Typography variant="caption" sx={{ color: '#94A3B8' }}>
-                Helpline: +91 80000 99888
-              </Typography>
-            </Box>
-          </Box>
-        </Container>
-      </Box>
-
-      {/* Main Navigation Bar */}
       <AppBar
         position="sticky"
         elevation={0}
@@ -102,49 +80,48 @@ export default function Navbar() {
           borderBottom: '1px solid #E2E8F0',
         }}
       >
-        <Container maxWidth="lg">
-          <Toolbar disableGutters sx={{ minHeight: { xs: 64, md: 72 }, gap: 2 }}>
-            {/* Logo */}
+        <Container maxWidth="xl">
+          <Toolbar disableGutters sx={{ minHeight: { xs: 64, md: 74 }, gap: { xs: 1, md: 2 } }}>
+            {/* 1. Brand Logo */}
             <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
               <Box
                 sx={{
-                  width: 42,
-                  height: 42,
+                  width: 38,
+                  height: 38,
                   borderRadius: '10px',
                   bgcolor: '#D9531E',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: '#FFFFFF',
-                  boxShadow: '0 4px 12px rgba(217, 83, 30, 0.3)',
+                  boxShadow: '0 4px 10px rgba(217, 83, 30, 0.25)',
                 }}
               >
-                <HardHat size={24} />
+                <HardHat size={22} />
               </Box>
               <Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Typography
-                    variant="h6"
-                    component="span"
-                    sx={{
-                      fontWeight: 800,
-                      color: '#0F172A',
-                      letterSpacing: '-0.03em',
-                      fontSize: '1.25rem',
-                      lineHeight: 1.1,
-                    }}
-                  >
-                    Nirman<span style={{ color: '#D9531E' }}>Setu</span>
-                  </Typography>
-                </Box>
+                <Typography
+                  variant="h6"
+                  component="span"
+                  sx={{
+                    fontWeight: 800,
+                    color: '#0F172A',
+                    letterSpacing: '-0.03em',
+                    fontSize: '1.25rem',
+                    lineHeight: 1,
+                  }}
+                >
+                  Nirman<span style={{ color: '#D9531E' }}>Setu</span>
+                </Typography>
                 <Typography
                   variant="caption"
                   sx={{
-                    display: 'block',
-                    fontSize: '0.68rem',
+                    display: { xs: 'none', sm: 'block' },
+                    fontSize: '0.65rem',
                     color: '#64748B',
                     fontWeight: 600,
-                    letterSpacing: '0.02em',
+                    lineHeight: 1,
+                    mt: 0.3,
                   }}
                 >
                   भरोसेमंद ठेकेदार • मजबूत निर्माण
@@ -152,39 +129,10 @@ export default function Navbar() {
               </Box>
             </Link>
 
-            {/* City Selector */}
-            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', ml: 1 }}>
-              <FormControl size="small" variant="standard">
-                <Select
-                  value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                  disableUnderline
-                  sx={{
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    color: '#334155',
-                    bgcolor: '#F1F5F9',
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: '20px',
-                    '& .MuiSelect-select': { py: 0.4, pr: '28px !important' },
-                  }}
-                  startAdornment={<MapPin size={14} color="#D9531E" style={{ marginRight: 6 }} />}
-                >
-                  {POPULAR_CITIES.map((c) => (
-                    <MenuItem key={c} value={c} sx={{ fontSize: '0.85rem' }}>
-                      {c}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-
-            {/* Desktop Nav Links */}
-            <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center', gap: 1 }}>
+            {/* 2. Desktop Navigation Links */}
+            <Box sx={{ display: { xs: 'none', lg: 'flex' }, alignItems: 'center', gap: 0.5, ml: 2 }}>
               {navLinks.map((item) => {
                 const isActive = pathname === item.href;
-                const Icon = item.icon;
                 return (
                   <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
                     <Button
@@ -201,71 +149,240 @@ export default function Navbar() {
                           color: '#D9531E',
                         },
                       }}
-                      startIcon={<Icon size={16} />}
                     >
                       {item.label}
-                      {item.badge && (
-                        <Box
-                          component="span"
-                          sx={{
-                            ml: 0.8,
-                            bgcolor: '#FEF3C7',
-                            color: '#B45309',
-                            fontSize: '0.68rem',
-                            fontWeight: 700,
-                            px: 0.8,
-                            py: 0.2,
-                            borderRadius: '4px',
-                            border: '1px solid #FDE68A',
-                          }}
-                        >
-                          {item.badge}
-                        </Box>
-                      )}
                     </Button>
                   </Link>
                 );
               })}
             </Box>
 
-            {/* Right Action Buttons */}
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1.5 }}>
-              <Link href="/cost-estimator" style={{ textDecoration: 'none' }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    borderColor: '#CBD5E1',
-                    color: '#0F172A',
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                    '&:hover': { borderColor: '#94A3B8', bgcolor: '#F8FAFC' },
-                  }}
-                >
-                  Calculate Cost
-                </Button>
-              </Link>
+            {/* Spacer */}
+            <Box sx={{ flexGrow: 1 }} />
 
-              <Link href="/contractors" style={{ textDecoration: 'none' }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  startIcon={<Sparkles size={15} />}
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                    px: 2,
-                    py: 0.9,
-                  }}
-                >
-                  Post Requirement
-                </Button>
-              </Link>
+            {/* 3. Reference-Matched Search Pill (`🔍 Search NirmanSetu...`) */}
+            <Box
+              component="form"
+              onSubmit={handleSearchSubmit}
+              sx={{
+                display: { xs: 'none', sm: 'flex' },
+                alignItems: 'center',
+                bgcolor: '#FBF5F1', // Soft warm blush tint matching reference image
+                borderRadius: '24px',
+                px: 2,
+                py: 0.6,
+                minWidth: { sm: 200, md: 240, lg: 280 },
+                border: '1px solid rgba(217, 83, 30, 0.15)',
+                transition: 'all 0.2s',
+                '&:focus-within': {
+                  bgcolor: '#FFFFFF',
+                  borderColor: '#D9531E',
+                  boxShadow: '0 0 0 3px rgba(217, 83, 30, 0.1)',
+                },
+              }}
+            >
+              <Search size={16} color="#8E6A58" style={{ marginRight: 8, flexShrink: 0 }} />
+              <InputBase
+                placeholder="Search NirmanSetu..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{
+                  fontSize: '0.86rem',
+                  color: '#4A3B32',
+                  width: '100%',
+                  '& input::placeholder': {
+                    color: '#8E6A58',
+                    opacity: 0.9,
+                  },
+                }}
+              />
             </Box>
 
+            {/* 4. `✨ Nirman AI` Pill Button matching reference */}
+            <Button
+              onClick={() => setAiModalOpen(true)}
+              startIcon={<Sparkles size={16} color="#B44010" />}
+              sx={{
+                display: { xs: 'none', sm: 'inline-flex' },
+                bgcolor: '#FFFFFF',
+                color: '#B44010',
+                border: '1px solid rgba(217, 83, 30, 0.28)',
+                borderRadius: '20px',
+                px: 2,
+                py: 0.7,
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                '&:hover': {
+                  bgcolor: '#FFF7ED',
+                  borderColor: '#D9531E',
+                },
+              }}
+            >
+              Nirman AI
+            </Button>
+
+            {/* 5. User Profile / Log in / Sign up Controls */}
+            {user ? (
+              // Logged in state
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Link href="/enquiries" style={{ textDecoration: 'none' }}>
+                  <Button
+                    size="small"
+                    startIcon={<FileText size={15} color="#D9531E" />}
+                    sx={{ color: '#0F172A', fontWeight: 600, fontSize: '0.85rem' }}
+                  >
+                    My Enquiries
+                  </Button>
+                </Link>
+
+                <Button
+                  onClick={(e) => setUserAnchor(e.currentTarget)}
+                  endIcon={<ChevronDown size={14} />}
+                  sx={{
+                    bgcolor: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: '20px',
+                    px: 1.5,
+                    py: 0.5,
+                    color: '#0F172A',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  <Avatar sx={{ width: 24, height: 24, bgcolor: '#D9531E', fontSize: '0.75rem', mr: 1 }}>
+                    {user.name[0]}
+                  </Avatar>
+                  {user.name.split(' ')[0]}
+                </Button>
+
+                <Menu
+                  anchorEl={userAnchor}
+                  open={Boolean(userAnchor)}
+                  onClose={() => setUserAnchor(null)}
+                  slotProps={{ paper: { sx: { borderRadius: 2, mt: 1, minWidth: 180 } } }}
+                >
+                  <Box sx={{ px: 2, py: 1 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                      {user.name}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B' }}>
+                      Role: {user.role}
+                    </Typography>
+                  </Box>
+                  <MenuItem component={Link} href="/enquiries" onClick={() => setUserAnchor(null)}>
+                    My Enquiries
+                  </MenuItem>
+                  {user.role === 'ADMIN' && (
+                    <MenuItem component={Link} href="/admin/dashboard" onClick={() => setUserAnchor(null)}>
+                      Admin Console
+                    </MenuItem>
+                  )}
+                  <MenuItem
+                    onClick={() => {
+                      setUserAnchor(null);
+                      logout();
+                    }}
+                    sx={{ color: '#DC2626' }}
+                  >
+                    <LogOut size={15} style={{ marginRight: 8 }} /> Log out
+                  </MenuItem>
+                </Menu>
+              </Box>
+            ) : (
+              // Logged out: Clean reference buttons `[ Log in ]` and `[ Sign up ⌃ ]`
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {/* Outlined `Log in` Button */}
+                <Button
+                  onClick={() => setOpenLoginModal(true)}
+                  sx={{
+                    color: '#A83C15',
+                    border: '1px solid #C87856',
+                    borderRadius: '8px',
+                    px: 2.2,
+                    py: 0.75,
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    bgcolor: '#FFFFFF',
+                    '&:hover': {
+                      bgcolor: '#FFF7ED',
+                      borderColor: '#A83C15',
+                    },
+                  }}
+                >
+                  Log in
+                </Button>
+
+                {/* Filled `Sign up ⌃` Button with dropdown */}
+                <Button
+                  onClick={(e) => setSignupAnchor(e.currentTarget)}
+                  endIcon={<ChevronDown size={15} />}
+                  sx={{
+                    bgcolor: '#A83C15', // Rich terracotta brick color matching screenshot
+                    color: '#FFFFFF',
+                    borderRadius: '8px',
+                    px: 2.2,
+                    py: 0.75,
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    boxShadow: 'none',
+                    '&:hover': {
+                      bgcolor: '#8F310F',
+                      boxShadow: 'none',
+                    },
+                  }}
+                >
+                  Sign up
+                </Button>
+
+                {/* Sign up role options */}
+                <Menu
+                  anchorEl={signupAnchor}
+                  open={Boolean(signupAnchor)}
+                  onClose={() => setSignupAnchor(null)}
+                  slotProps={{ paper: { sx: { borderRadius: 2, mt: 1, minWidth: 200 } } }}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      setSignupAnchor(null);
+                      setOpenSignupModal(true);
+                    }}
+                  >
+                    <User size={16} color="#059669" style={{ marginRight: 10 }} />
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        As Homeowner
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#64748B' }}>
+                        Post requirements & hire
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+
+                  <MenuItem
+                    onClick={() => {
+                      setSignupAnchor(null);
+                      setOpenSignupModal(true);
+                    }}
+                  >
+                    <HardHat size={16} color="#D9531E" style={{ marginRight: 10 }} />
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        As Thekedar / Contractor
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#64748B' }}>
+                        Get leads & list company
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                </Menu>
+              </Box>
+            )}
+
             {/* Mobile Hamburger Toggle */}
-            <Box sx={{ display: { xs: 'flex', md: 'none' }, ml: 'auto' }}>
+            <Box sx={{ display: { xs: 'flex', lg: 'none' }, ml: 0.5 }}>
               <IconButton
                 aria-label="open drawer"
                 edge="start"
@@ -293,8 +410,8 @@ export default function Navbar() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Box
               sx={{
-                width: 34,
-                height: 34,
+                width: 32,
+                height: 32,
                 borderRadius: '8px',
                 bgcolor: '#D9531E',
                 display: 'flex',
@@ -303,7 +420,7 @@ export default function Navbar() {
                 color: '#FFF',
               }}
             >
-              <HardHat size={20} />
+              <HardHat size={18} />
             </Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
               Nirman<span style={{ color: '#D9531E' }}>Setu</span>
@@ -314,12 +431,32 @@ export default function Navbar() {
           </IconButton>
         </Box>
 
-        <List sx={{ pt: 2 }}>
+        <Box sx={{ my: 2 }}>
+          <Button
+            fullWidth
+            onClick={() => {
+              setMobileOpen(false);
+              setAiModalOpen(true);
+            }}
+            startIcon={<Sparkles size={16} color="#B44010" />}
+            sx={{
+              bgcolor: '#FFF7ED',
+              color: '#B44010',
+              border: '1px solid #FFEDD5',
+              py: 1,
+              borderRadius: 2,
+              fontWeight: 700,
+            }}
+          >
+            Ask Nirman AI
+          </Button>
+        </Box>
+
+        <List>
           {navLinks.map((item) => {
-            const Icon = item.icon;
             const isActive = pathname === item.href;
             return (
-              <ListItem key={item.href} disablePadding sx={{ mb: 1 }}>
+              <ListItem key={item.href} disablePadding sx={{ mb: 0.5 }}>
                 <ListItemButton
                   component={Link}
                   href={item.href}
@@ -330,7 +467,6 @@ export default function Navbar() {
                     color: isActive ? '#D9531E' : '#1E293B',
                   }}
                 >
-                  <Icon size={18} style={{ marginRight: 12 }} />
                   <ListItemText
                     primary={
                       <Typography sx={{ fontWeight: isActive ? 700 : 500, fontSize: '0.92rem' }}>
@@ -343,7 +479,7 @@ export default function Navbar() {
             );
           })}
 
-          <ListItem disablePadding sx={{ mt: 2, mb: 1 }}>
+          <ListItem disablePadding sx={{ mt: 1 }}>
             <ListItemButton
               component={Link}
               href="/admin/dashboard"
@@ -355,11 +491,10 @@ export default function Navbar() {
                 border: '1px solid #FDE68A',
               }}
             >
-              <UserCheck size={18} style={{ marginRight: 12 }} />
               <ListItemText
                 primary={
-                  <Typography sx={{ fontWeight: 700, fontSize: '0.9rem' }}>
-                    Admin Demo Portal
+                  <Typography sx={{ fontWeight: 700, fontSize: '0.88rem' }}>
+                    Admin Console Demo
                   </Typography>
                 }
               />
@@ -367,14 +502,51 @@ export default function Navbar() {
           </ListItem>
         </List>
 
-        <Box sx={{ mt: 'auto', pt: 3 }}>
-          <Link href="/contractors" style={{ textDecoration: 'none' }} onClick={() => setMobileOpen(false)}>
-            <Button fullWidth variant="contained" color="primary" sx={{ py: 1.2, fontWeight: 700 }}>
-              Post Requirement
+        <Box sx={{ mt: 'auto', pt: 3, display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {!user ? (
+            <>
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={() => {
+                  setMobileOpen(false);
+                  setOpenLoginModal(true);
+                }}
+                sx={{ py: 1.1, fontWeight: 700, borderColor: '#C87856', color: '#A83C15' }}
+              >
+                Log in
+              </Button>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => {
+                  setMobileOpen(false);
+                  setOpenSignupModal(true);
+                }}
+                sx={{ py: 1.1, fontWeight: 700, bgcolor: '#A83C15' }}
+              >
+                Sign up
+              </Button>
+            </>
+          ) : (
+            <Button
+              fullWidth
+              variant="outlined"
+              color="error"
+              onClick={() => {
+                setMobileOpen(false);
+                logout();
+              }}
+            >
+              Log out ({user.name.split(' ')[0]})
             </Button>
-          </Link>
+          )}
         </Box>
       </Drawer>
+
+      {/* Global Auth Modal & Nirman AI Modal */}
+      <AuthModal />
+      <NirmanAIModal open={aiModalOpen} onClose={() => setAiModalOpen(false)} />
     </>
   );
 }

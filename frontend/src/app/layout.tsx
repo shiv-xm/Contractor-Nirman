@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   ],
 };
 
+import { AuthProvider } from '@/context/AuthContext';
+
 export default function RootLayout({
   children,
 }: {
@@ -28,11 +30,13 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ThemeRegistry>
-          <React.Suspense fallback={<div style={{ minHeight: 72 }} />}>
-            <Navbar />
-          </React.Suspense>
-          <main style={{ flexGrow: 1 }}>{children}</main>
-          <Footer />
+          <AuthProvider>
+            <React.Suspense fallback={<div style={{ minHeight: 74 }} />}>
+              <Navbar />
+            </React.Suspense>
+            <main style={{ flexGrow: 1 }}>{children}</main>
+            <Footer />
+          </AuthProvider>
         </ThemeRegistry>
       </body>
     </html>
