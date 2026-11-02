@@ -1,0 +1,12 @@
+package com.nirmansetu;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class NirmanSetuApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(NirmanSetuApplication.class, args);
+    }
+}
