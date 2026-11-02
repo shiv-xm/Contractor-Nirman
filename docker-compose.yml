@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nirmansetu-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: nirmansetu_db
+      POSTGRES_USER: nirmansetu_user
+      POSTGRES_PASSWORD: nirmansetu_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - nirmansetu_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nirmansetu_user -d nirmansetu_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  nirmansetu_pgdata:
+    driver: local
